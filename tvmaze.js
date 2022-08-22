@@ -45,16 +45,16 @@ function populateShows(shows) {
 
     // update HTML using info from show data
     const $show = $(
-        `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
+        `<div data-show-id="${show.id}" class="card col-sm-8 col-md-5 col-lg-3 col-xl-2 m-2 pb-3">
          <div class="media">
            <img 
               src="${img}" 
               alt="Bletchly Circle San Francisco" 
-              class="w-25 mr-3">
+              class="card-img-top mr-3 my-2"> <!-- btn-outline-light btn-sm Show-getEpisodes -->
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
              <div><small>${show.summary}</small></div>
-             <button class="btn btn-outline-light btn-sm Show-getEpisodes">
+             <button class="btn btn-outline-primary">
                Episodes
              </button>
            </div>
