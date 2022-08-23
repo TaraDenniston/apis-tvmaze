@@ -2,6 +2,7 @@
 
 const $showsList = $("#shows-list");
 const $episodesArea = $("#episodes-area");
+const $episodesList = $("#episodes-list");
 const $searchForm = $("#search-form");
 
 
@@ -45,22 +46,24 @@ function populateShows(shows) {
 
     // update HTML using info from show data
     const $show = $(
-        `<div data-show-id="${show.id}" class="card col-sm-8 col-md-5 col-lg-3 col-xl-2 m-2 pb-3">
-         <div class="media">
-           <img 
-              src="${img}" 
-              alt="Bletchly Circle San Francisco" 
-              class="card-img-top mr-3 my-2"> <!-- btn-outline-light btn-sm Show-getEpisodes -->
-           <div class="media-body">
-             <h5 class="text-primary">${show.name}</h5>
-             <div><small>${show.summary}</small></div>
-             <button class="btn btn-outline-primary">
-               Episodes
-             </button>
-           </div>
-         </div>  
-       </div>
-      `);
+     `<div data-show-id="${show.id}" class="card col-sm-8 col-md-5 col-lg-3 col-xl-2 m-2 pb-3">
+        <div class="media">
+          <img 
+            src="${img}" 
+            alt="${show.name}" 
+            class="card-img-top mr-3 my-2">
+          <div class="media-body">
+            <h5 class="text-primary">${show.name}</h5>
+            <div><small>${show.summary}</small></div>
+              <a href="#episodes-area">
+                <button class="btn btn-outline-primary">
+                  Episodes
+                </button>
+              </a>
+          </div>
+        </div>  
+      </div>`
+    );
 
     $showsList.append($show);  }
 }
@@ -88,8 +91,46 @@ $searchForm.on("submit", async function (evt) {
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
+ async function getEpisodesOfShow(id) {
+  const episodes = [];
 
-/** Write a clear docstring for this function... */
+  // make request to TVMaze search shows API
+  await $.get( `http://api.tvmaze.com/shows/${id}/episodes`, function( data ) {
+    // from the result, add data from each episode to the episodes array  
+    for (let item of data) {
+      const {id, name, season, number} = item;
+      episodes.push({id, name, season, number});
+    }    
+  });
 
-// function populateEpisodes(episodes) { }
+  return episodes;
+}
+
+
+/** Given a list of episodes, create markup for each and add to DOM */
+
+function populateEpisodes(episodes) {
+  $episodesList.empty();
+  $episodesArea.show();
+
+  for (let episode of episodes) {
+    // update HTML using info from episode data
+    const $episode = $(
+      `<li>${episode.name} (season ${episode.season}, number ${episode.number})</li>`
+    );
+
+    $episodesList.append($episode);  }
+}
+
+
+/** When an Episodes button is clicked for a show, find the show ID and use
+ *  it to request a list of episodes and display them in the DOM
+ */
+
+$showsList.on("click", async function (evt) {
+  const id = $(evt.target).parent().parent().parent().parent().attr('data-show-id');
+  const episodes = await getEpisodesOfShow(id);
+
+  $episodesArea.show();
+  await populateEpisodes(episodes);
+});
